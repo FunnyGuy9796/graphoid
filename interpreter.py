@@ -73,14 +73,6 @@ class Interpreter:
             except Exception as e:
                 print(f"Error: Failed evaluating SET operation: {operation} | Error: {e}")
 
-        elif operation.startswith("INCREMENT"):
-            cell = operation[10:-1].strip()
-            self.memory[cell] = self.memory.get(cell, 0) + 1
-        
-        elif operation.startswith("DECREMENT"):
-            cell = operation[10:-1].strip()
-            self.memory[cell] = self.memory.get(cell, 0) - 1
-
         elif operation.startswith("OUTPUT"):
             content = operation[7:-1].strip()
             if content.startswith('"') and content.endswith('"'):
