@@ -1,0 +1,13 @@
+<start>[A]{SET(cell0, 0)}
+
+<A>[B|E]{COMPARE(cell0 < 10)}
+
+<B>[C]{OUTPUT("Loop iteration...")}
+
+<C>[D]{INCREMENT(cell0)}
+
+<D>[A]{OUTPUT("Value: {cell0}")}
+
+<E>[end]{OUTPUT("Exiting loop...")}
+
+<end>[]{}
