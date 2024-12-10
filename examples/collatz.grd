@@ -1,0 +1,12 @@
+<start>[A]{OUTPUT("Colatz Conjecture program to test Turing completeness...")}
+
+<A>[B]{SET(num, 5)}
+<B>[loop]{OUTPUT("Starting number: {num}")}
+
+<loop>[C|end]{CHECK(num != 1)}
+<C>[D|E]{CHECK(num % 2 == 0)}
+<D>[F]{SET(num, num // 2)}
+<E>[F]{SET(num, num * 3 + 1)}
+<F>[loop]{OUTPUT("Current number: {num}")}
+
+<end>[]{OUTPUT("Collatz sequence complete")}

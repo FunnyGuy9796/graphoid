@@ -5,6 +5,7 @@ class Interpreter:
     def __init__(self):
         self.memory = {}
         self.graph = {}
+        self.debug = False
     
     def readFile(self, filename):
         try:
@@ -46,9 +47,31 @@ class Interpreter:
     def execOp(self, operation):
         if operation.startswith("SET"):
             parts = operation[4:-1].split(", ")
-            cell = parts[0]
-            value = int(parts[1])
-            self.memory[cell] = value
+            cell = parts[0].strip()
+            expression = parts[1].strip()
+
+            try:
+                if self.debug:
+                    print(f"DEBUG: Before SET | {cell}: {self.memory.get(cell, None)}")
+
+                if re.match(r"^-?\d+$", expression):
+                    self.memory[cell] = int(expression)
+                else:
+                    if self.debug:
+                        print(f"DEBUG: Evaluating SET operation for {cell}: {expression}")
+                    evalValue = eval(
+                        re.sub(r"\b([a-zA-Z_][a-zA-Z0-9_]*)\b",
+                            lambda match: str(self.memory.get(match.group(1), 0)),
+                            expression)
+                    )
+                    if self.debug:
+                        print(f"DEBUG: Result of {expression} -> {evalValue}")
+                    self.memory[cell] = evalValue
+                
+                if self.debug:
+                    print(f"DEBUG: After SET | {cell}: {self.memory[cell]}")
+            except Exception as e:
+                print(f"Error: Failed evaluating SET operation: {operation} | Error: {e}")
 
         elif operation.startswith("INCREMENT"):
             cell = operation[10:-1].strip()
@@ -72,9 +95,16 @@ class Interpreter:
             else:
                 print(self.memory.get(content, 0))
         
-        elif operation.startswith("COMPARE"):
-            condition = operation[8:-1].strip()
-            return eval(condition, {}, self.memory)
+        elif operation.startswith("CHECK"):
+            condition = operation[6:-1].strip()
+            result = eval(condition, {}, self.memory)
+
+            if self.debug:
+                print(f"DEBUG: Evaluating CHECK operation: {condition} | {result}")
+            return result
+        
+        else:
+            print(f"{operation} is not recognized")
 
     def run(self):
         currNode = "start"
@@ -104,6 +134,8 @@ class Interpreter:
             print(f"Node: {node}")
             print(f"    Edges: {details["edges"]}")
             print(f"    Operation: {details["operation"]}")
+        
+        print("")
 
 def main():
     if len(sys.argv) < 2:
@@ -119,7 +151,8 @@ def main():
     
     interpreter.parseProgram(programContents)
 
-    # interpreter.displayGraph()
+    if interpreter.debug:
+        interpreter.displayGraph()
 
     interpreter.run()
 

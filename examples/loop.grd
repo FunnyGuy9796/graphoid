@@ -1,6 +1,6 @@
 <start>[A]{SET(cell0, 0)}
 
-<A>[B|E]{COMPARE(cell0 < 10)}
+<A>[B|E]{CHECK(cell0 < 10)}
 
 <B>[C]{OUTPUT("Loop iteration...")}
 

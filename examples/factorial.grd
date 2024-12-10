@@ -1,0 +1,13 @@
+<start>[A]{OUTPUT("Factorial program to test Turing completeness...")}
+
+<A>[B]{SET(num, 7)}
+<B>[C]{SET(result, 1)}
+<C>[loop]{SET(temp, num)}
+
+<loop>[D|output]{CHECK(temp != 0)}
+<D>[E]{SET(result, result * temp)}
+<E>[loop]{DECREMENT(temp)}
+
+<output>[end]{OUTPUT("Factorial of {num} is {result}")}
+
+<end>[]{}
