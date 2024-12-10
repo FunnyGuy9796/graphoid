@@ -121,7 +121,6 @@ def main():
 
     # interpreter.displayGraph()
 
-    print("\nRunning Program:")
     interpreter.run()
 
 if __name__ == "__main__":
