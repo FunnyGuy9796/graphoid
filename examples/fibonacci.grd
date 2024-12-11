@@ -1,19 +1,25 @@
 <start>[A]{OUTPUT("Fibonacci program to test Turing completeness...")}
 
-<A>[B]{SET(cell0, 0)}
-<B>[C]{SET(cell1, 1)}
-<C>[D]{SET(count, 10)}
+<A>[B]{SET(0)}
+<B>[C]{SHIFT(>)}
+<C>[D]{SET(1)}
+<D>[E]{SHIFT(>)}
+<E>[F]{SET(10)}
 
-<D>[E]{OUTPUT("F_0: {cell0}")}
-<E>[F]{OUTPUT("F_1: {cell1}")}
+<F>[G]{OUTPUT("F_0: {-2}")}
+<G>[H]{OUTPUT("F_1: {-1}")}
 
-<F>[G]{SET(temp, cell0 + cell1)}
-<G>[H]{OUTPUT("F_next: {temp}")}
+<H>[I]{SHIFT(>)}
+<I>[J]{SET({-3} + {-2})}
+<J>[K]{OUTPUT("F_next: {}")}
 
-<H>[I]{SET(cell0, cell1)}
-<I>[J]{SET(cell1, temp)}
-<J>[K|end]{CHECK(count > 2)}
-<K>[L]{DECREMENT(count)}
-<L>[F]{}
+<K>[L]{SHIFT(<<<)}
+<L>[M]{SET({+1})}
+<M>[N]{SHIFT(>)}
+<N>[O]{SET({+2})}
+<O>[P]{SHIFT(>)}
+<P>[Q|R]{CHECK}
+<Q>[F]{DECREMENT}
+<R>[end]{OUTPUT("Fibonacci sequence generation complete")}
 
-<end>[]{OUTPUT("Fibonacci sequence generation complete")}
+<end>[]{}

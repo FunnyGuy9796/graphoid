@@ -4,8 +4,22 @@ import re
 class Interpreter:
     def __init__(self):
         self.memory = {}
+        self.pointer = 0
         self.graph = {}
         self.debug = False
+    
+    def replaceMemRef(self, match):
+        innerContent = match.group(1)
+
+        if not innerContent:
+            return str(self.memory.get(self.pointer, 0))
+        
+        try:
+            indexVal = int(innerContent)
+            targetPtr = self.pointer + indexVal
+            return str(self.memory.get(targetPtr, 0))
+        except ValueError:
+            return match.group(0)
     
     def readFile(self, filename):
         try:
@@ -46,68 +60,103 @@ class Interpreter:
     
     def execOp(self, operation):
         if operation.startswith("SET"):
-            parts = operation[4:-1].split(", ")
-            cell = parts[0].strip()
-            expression = parts[1].strip()
+            expression = operation[4:-1]
 
             try:
                 if self.debug:
-                    print(f"DEBUG: Before SET | {cell}: {self.memory.get(cell, None)}")
+                    print(f"DEBUG: Before SET | {self.pointer}: {self.memory.get(self.pointer, None)}")
+                
+                if expression.startswith("{") and expression.endswith("}"):
+                    processedExpression = re.sub(r'\{(.*?)\}', self.replaceMemRef, expression)
 
-                if re.match(r"^-?\d+$", expression):
-                    self.memory[cell] = int(expression)
+                    if self.debug:
+                        print(f"DEBUG: Processed Expression: {processedExpression}")
+                        
+                    result = eval(processedExpression)
+                    self.memory[self.pointer] = result
+
+                    if self.debug:
+                        print(f"DEBUG: After SET | {self.pointer}: {self.memory.get(self.pointer, None)}")
+
+                elif re.match(r"^-?\d+$", expression):
+                    self.memory[self.pointer] = int(expression)
                 else:
                     if self.debug:
-                        print(f"DEBUG: Evaluating SET operation for {cell}: {expression}")
+                        print(f"DEBUG: Evaluating SET operation for {self.pointer}: {expression}")
+
                     evalValue = eval(
                         re.sub(r"\b([a-zA-Z_][a-zA-Z0-9_]*)\b",
                             lambda match: str(self.memory.get(match.group(1), 0)),
                             expression)
                     )
-                    if self.debug:
-                        print(f"DEBUG: Result of {expression} -> {evalValue}")
-                    self.memory[cell] = evalValue
+
+                    self.memory[self.pointer] = evalValue
                 
                 if self.debug:
-                    print(f"DEBUG: After SET | {cell}: {self.memory[cell]}")
+                    print(f"DEBUG: After SET | {self.pointer}: {self.memory[self.pointer]}")
             except Exception as e:
                 print(f"Error: Failed evaluating SET operation: {operation} | Error: {e}")
 
         elif operation.startswith("INCREMENT"):
-            cell = operation[10:-1].strip()
-            self.memory[cell] = self.memory.get(cell, 0) + 1
+            if self.debug:
+                print(f"DEBUG: Before INCREMENT | Pointer: {self.pointer} | Value: {self.memory.get(self.pointer, None)}")
+
+            self.memory[self.pointer] = self.memory.get(self.pointer, 0) + 1
+
+            if self.debug:
+                print(f"DEBUG: After INCREMENT | Pointer: {self.pointer} | Value: {self.memory.get(self.pointer, None)}")
         
         elif operation.startswith("DECREMENT"):
-            cell = operation[10:-1].strip()
-            self.memory[cell] = self.memory.get(cell, 0) - 1
+            if self.debug:
+                print(f"DEBUG: Before DECREMENT | Pointer: {self.pointer} | Value: {self.memory.get(self.pointer, None)}")
+
+            self.memory[self.pointer] = self.memory.get(self.pointer, 0) - 1
+
+            if self.debug:
+                print(f"DEBUG: After DECREMENT | Pointer: {self.pointer} | Value: {self.memory.get(self.pointer, None)}")
 
         elif operation.startswith("OUTPUT"):
             content = operation[7:-1].strip()
-            if content.startswith('"') and content.endswith('"'):
-                stringContent = content[1:-1]
-                formattedContent = re.sub(
-                    r"\{([a-zA-Z0-9_]+)\}",
-                    lambda match: str(self.memory.get(match.group(1), 0)),
-                    stringContent
-                )
-
-                print(formattedContent)
-            else:
-                print(self.memory.get(content, 0))
-        
-        elif operation.startswith("CHECK"):
-            condition = operation[6:-1].strip()
-            result = eval(condition, {}, self.memory)
 
             if self.debug:
-                print(f"DEBUG: Evaluating CHECK operation: {condition} | {result}")
+                print(f"DEBUG: OUTPUT content raw: {content}")
+
+            if content.startswith('"') and content.endswith('"'):
+                stringContent = content[1:-1]
+
+                formattedContent = re.sub(r'\{(.*?)\}', self.replaceMemRef, stringContent)
+                print(formattedContent)
+            else:
+                print(self.memory.get(self.pointer, 0))
+        
+        elif operation.startswith("CHECK"):
+            result = True if self.memory[self.pointer] != 0 else False
+
+            if self.debug:
+                print(f"DEBUG: Evaluating CHECK operation: {result}")
             return result
         
+        elif operation.startswith("SHIFT"):
+            direction = operation[6:-1].strip()
+            shiftCount = direction.count(">") if ">" in direction else direction.count("<")
+
+            if self.debug:
+                print(f"DEBUG: Before SHIFT | Pointer: {self.pointer}")
+
+            if "<" in direction:
+                self.pointer -= shiftCount
+            elif ">" in direction:
+                self.pointer += shiftCount
+            
+            if self.debug:
+                print(f"DEBUG: After SHIFT | Pointer: {self.pointer}")
+
         else:
             print(f"{operation} is not recognized")
 
     def run(self):
         currNode = "start"
+
         while currNode != "end":
             nodeData = self.graph.get(currNode)
             if not nodeData:

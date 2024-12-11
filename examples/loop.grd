@@ -1,13 +1,10 @@
-<start>[A]{SET(cell0, 0)}
+<start>[A]{OUTPUT("A simple conditional program...")}
 
-<A>[B|E]{CHECK(cell0 < 10)}
+<A>[B]{SET(12)}
+<B>[C|E]{CHECK}
+<C>[D]{OUTPUT("Value: {0}")}
+<D>[B]{DECREMENT}
 
-<B>[C]{OUTPUT("Loop iteration...")}
-
-<C>[D]{INCREMENT(cell0)}
-
-<D>[A]{OUTPUT("Value: {cell0}")}
-
-<E>[end]{OUTPUT("Exiting loop...")}
+<E>[end]{OUTPUT("Value reached: {0}")}
 
 <end>[]{}
