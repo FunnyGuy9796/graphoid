@@ -1,25 +1,43 @@
-<start>[A]{OUTPUT("Fibonacci program to test Turing completeness...")}
+[START {
+    print("This is an example program that calculates $[LIMITVAR] numbers in the Fibonacci sequence")
+} -> CHECK]
 
-<A>[B]{SET(0)}
-<B>[C]{SHIFT(>)}
-<C>[D]{SET(1)}
-<D>[E]{SHIFT(>)}
-<E>[F]{SET(10)}
+[LIMITVAR {
+    20
+} -> NONE]
 
-<F>[G]{OUTPUT("F_0: {-2}")}
-<G>[H]{OUTPUT("F_1: {-1}")}
+[F1 {
+    0
+} -> NONE]
 
-<H>[I]{SHIFT(>)}
-<I>[J]{SET({-3} + {-2})}
-<J>[K]{OUTPUT("F_next: {}")}
+[F2 {
+    1
+} -> NONE]
 
-<K>[L]{SHIFT(<<<)}
-<L>[M]{SET({+1})}
-<M>[N]{SHIFT(>)}
-<N>[O]{SET({+2})}
-<O>[P]{SHIFT(>)}
-<P>[Q|R]{CHECK}
-<Q>[F]{DECREMENT}
-<R>[end]{OUTPUT("Fibonacci sequence generation complete")}
+[TEMP {
+    0
+} -> NONE]
 
-<end>[]{}
+[CHECK {
+    if ($[F1] <= $[LIMITVAR])
+} -> END | OUTPUT]
+
+[OUTPUT {
+    print("$[F1]")
+} -> INC_TEMP]
+
+[INC_TEMP {
+    set(TEMP, $[F1] + $[F2])
+} -> INC_F2]
+
+[INC_F2 {
+    set(F2, $[F1])
+} -> INC_F1]
+
+[INC_F1 {
+    set(F1, $[TEMP])
+} -> CHECK]
+
+[END {
+    print("Program complete")
+} -> NONE]

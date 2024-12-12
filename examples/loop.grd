@@ -1,10 +1,27 @@
-<start>[A]{OUTPUT("A simple conditional program...")}
+[START {
+    print("This is an example program where we count from $[COUNTVAR] to $[LIMITVAR]")
+} -> CHECK]
 
-<A>[B]{SET(12)}
-<B>[C|E]{CHECK}
-<C>[D]{OUTPUT("Value: {0}")}
-<D>[B]{DECREMENT}
+[COUNTVAR {
+    1
+} -> NONE]
 
-<E>[end]{OUTPUT("Value reached: {0}")}
+[LIMITVAR {
+    10
+} -> NONE]
 
-<end>[]{}
+[CHECK {
+    if ($[COUNTVAR] <= $[LIMITVAR])
+} -> END | OUTPUT]
+
+[OUTPUT {
+    print("Value: $[COUNTVAR]")
+} -> COUNT]
+
+[COUNT {
+    set(COUNTVAR, $[COUNTVAR] + 1)
+} -> CHECK]
+
+[END {
+    print("Program complete")
+} -> NONE]
