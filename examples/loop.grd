@@ -10,12 +10,43 @@
     10
 } -> NONE]
 
+[NODE_1 {
+    0
+} -> NONE]
+[NODE_2 {
+    9
+} -> NONE]
+[NODE_3 {
+    8
+} -> NONE]
+[NODE_4 {
+    7
+} -> NONE]
+[NODE_5 {
+    6
+} -> NONE]
+[NODE_6 {
+    5
+} -> NONE]
+[NODE_7 {
+    4
+} -> NONE]
+[NODE_8 {
+    3
+} -> NONE]
+[NODE_9 {
+    2
+} -> NONE]
+[NODE_10 {
+    1
+} -> NONE]
+
 [CHECK {
-    if ($[COUNTVAR] <= $[LIMITVAR])
+    if($[COUNTVAR] <= $[LIMITVAR])
 } -> END | OUTPUT]
 
 [OUTPUT {
-    print("Value: $[COUNTVAR]")
+    print("Value: $[NODE_$[COUNTVAR]]")
 } -> COUNT]
 
 [COUNT {

@@ -1,9 +1,9 @@
 [START {
-    print("This is an example program that calculates $[LIMITVAR] numbers in the Fibonacci sequence")
+    print("This is an example program that calculates the Fibonacci sequence up to $[LIMITVAR]")
 } -> CHECK]
 
 [LIMITVAR {
-    20
+    40
 } -> NONE]
 
 [F1 {
@@ -19,11 +19,11 @@
 } -> NONE]
 
 [CHECK {
-    if ($[F1] <= $[LIMITVAR])
+    if($[F1] <= $[LIMITVAR])
 } -> END | OUTPUT]
 
 [OUTPUT {
-    print("$[F1]")
+    print("Fibonacci: $[F1]")
 } -> INC_TEMP]
 
 [INC_TEMP {
