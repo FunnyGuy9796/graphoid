@@ -1,5 +1,5 @@
 [START {
-    print("This is an example program where we count from $[COUNTVAR] to $[LIMITVAR]")
+    print("This is an example program where we count from $[LIMITVAR] to $[COUNTVAR]")
 } -> CHECK]
 
 [COUNTVAR {
@@ -11,7 +11,7 @@
 } -> NONE]
 
 [NODE_1 {
-    0
+    10
 } -> NONE]
 [NODE_2 {
     9

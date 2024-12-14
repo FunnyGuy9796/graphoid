@@ -3,7 +3,7 @@
 } -> CHECK]
 
 [LIMITVAR {
-    40
+    400
 } -> NONE]
 
 [F1 {

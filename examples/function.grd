@@ -1,0 +1,23 @@
+[START {
+    print("This is an example program that calls a function and then returns to the main execution")
+} -> EXECUTE]
+
+[EXECUTE {
+    call(FUNCTION)
+} -> OTHER]
+
+[FUNCTION {
+    print("This is the function node")
+} -> STEP2]
+
+[STEP2 {
+    print("This is a second node in the function")
+} -> NONE]
+
+[OTHER {
+    print("We have successfully returned to the main execution")
+} -> END]
+
+[END {
+    print("Program complete")
+} -> NONE]

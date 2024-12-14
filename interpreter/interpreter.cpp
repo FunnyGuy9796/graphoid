@@ -94,6 +94,34 @@ Node Interpreter::getNode(const string& name) {
     throw runtime_error("Node not found: " + name);
 }
 
+void Interpreter::setNext(int result) {
+    if (debug)
+        cout << "Old nextNode: " << nextNode.name << " Old callNode: " << callNode.name << endl;
+
+    if (result != 2) {
+        if (!nextNode.edges.empty()) {
+            if (nextNode.edges[result] != "NONE")
+                nextNode = getNode(nextNode.edges[result]);
+            else if (callNode.name != "NONE" && inFunction) {
+                nextNode = getNode(callNode.edges[0]);
+                
+                inFunction = false;
+                callNode.name = "NONE";
+                callNode.operation = "";
+                callNode.edges = {};
+            }
+        } else if (nextNode.name != "END")
+            throw runtime_error("Runtime Error: Missing next node for execution");
+    } else {
+        inFunction = true;
+        callNode = nextNode;
+        nextNode = funcNode;
+    }
+    
+    if (debug)
+        cout << "nextNode: " << nextNode.name << " callNode: " << callNode.name << endl;
+}
+
 string Interpreter::replaceVariables(const string& operation) {
     stack<string> stack;
     string result;
@@ -201,10 +229,7 @@ void Interpreter::execNode(Node currNode) {
         
         cout << body << endl;
 
-        if (!nextNode.edges.empty() && nextNode.edges[0] != "NONE")
-            nextNode = getNode(nextNode.edges[0]);
-        else
-            throw runtime_error("Runtime Error: Missing next node for execution");
+        setNext(0);
     } else if (command == "set" && !body.empty()) {
         vector<string> bodyParts = split(body, ',');
 
@@ -226,23 +251,15 @@ void Interpreter::execNode(Node currNode) {
         } else
             throw runtime_error("Runtime Error: Destination node not found for set() operation");
         
-        if (!nextNode.edges.empty() && nextNode.edges[0] != "NONE")
-            nextNode = getNode(nextNode.edges[0]);
-        else
-            throw runtime_error("Runtime Error: Missing next node for execution");
+        setNext(0);
     } else if (command == "if" && !body.empty()) {
         result = calcExpression(body);
 
-        if (result) {
-            if (nextNode.edges.size() > 1 && nextNode.edges[1] != "NONE")
-                nextNode = getNode(nextNode.edges[1]);
-            else
-                throw runtime_error("Runtime Error: Missing true path for conditional");
-                
-        } else if (!nextNode.edges.empty() && nextNode.edges[0] != "NONE")
-            nextNode = getNode(nextNode.edges[0]);
-        else
-            throw runtime_error("Runtime Error: Missing next node for execution");
+        setNext(static_cast<int>(result));
+    } else if (command == "call" && !body.empty()) {
+        funcNode = getNode(body);
+
+        setNext(2);
     }
 }
 
@@ -292,9 +309,12 @@ void Interpreter::runProgram() {
         while (true) {
             execNode(nextNode);
 
-            if (nextNode.edges.size() < 1 || nextNode.edges[0] == "NONE")
+            if (nextNode.edges.size() < 1 || nextNode.name == "END")
                 break;
         }
+
+        nextNode = getNode("END");
+        execNode(nextNode);
 
     } catch (const exception& e) {
         throw runtime_error("Error: " + string(e.what()));

@@ -20,11 +20,14 @@ struct Node {
 class Interpreter {
     private:
         bool debug;
+        bool inFunction = false;
         string filePath;
         string program;
         vector<Node> nodes;
         unordered_map<string, string> nodeMap;
         Node nextNode;
+        Node funcNode;
+        Node callNode;
         double result = 0.0;
 
         typedef exprtk::symbol_table<double> symbol_table_t;
@@ -40,6 +43,7 @@ class Interpreter {
         Node parseNode(const string& block);
         vector<Node> tokenizeProgram();
         Node getNode(const string& name);
+        void setNext(int result);
         string replaceVariables(const string& operation);
         bool isExpression(const string& operation);
         double calcExpression(const string& body);
