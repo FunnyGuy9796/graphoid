@@ -1,5 +1,5 @@
 [START {
-    print("This is an example program that calls a function and then returns to the main execution")
+    print("This is an example program that calls a function and then returns to the main execution\n\n")
 } -> EXECUTE]
 
 [EXECUTE {
@@ -7,17 +7,17 @@
 } -> OTHER]
 
 [FUNCTION {
-    print("This is the function node")
+    print("This is the function node\n")
 } -> STEP2]
 
 [STEP2 {
-    print("This is a second node in the function")
+    print("This is a second node in the function\n")
 } -> NONE]
 
 [OTHER {
-    print("We have successfully returned to the main execution")
+    print("We have successfully returned to the main execution\n")
 } -> END]
 
 [END {
-    print("Program complete")
+    print("\nProgram complete\n")
 } -> NONE]

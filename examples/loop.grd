@@ -1,5 +1,5 @@
 [START {
-    print("This is an example program where we count from $[LIMITVAR] to $[COUNTVAR]")
+    print("This is an example program where we count from $[LIMITVAR] to $[COUNTVAR]\n\n")
 } -> CHECK]
 
 [COUNTVAR {
@@ -46,7 +46,7 @@
 } -> END | OUTPUT]
 
 [OUTPUT {
-    print("Value: $[NODE_$[COUNTVAR]]")
+    print("Value: $[NODE_$[COUNTVAR]]\n")
 } -> COUNT]
 
 [COUNT {
@@ -54,5 +54,5 @@
 } -> CHECK]
 
 [END {
-    print("Program complete")
+    print("\nProgram complete\n")
 } -> NONE]

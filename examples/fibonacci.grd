@@ -1,10 +1,10 @@
 [START {
-    print("This is an example program that calculates the Fibonacci sequence up to $[LIMITVAR]")
-} -> CHECK]
+    print("This is an example program that calculates the Fibonacci sequence up to a random limit\n\n")
+} -> LIMITVAR]
 
 [LIMITVAR {
-    400
-} -> NONE]
+    random(20, 400)
+} -> SHOW_LIMIT]
 
 [F1 {
     0
@@ -18,12 +18,16 @@
     0
 } -> NONE]
 
+[SHOW_LIMIT {
+    print("Limit: $[LIMITVAR]\n\n")
+} -> CHECK]
+
 [CHECK {
     if($[F1] <= $[LIMITVAR])
 } -> END | OUTPUT]
 
 [OUTPUT {
-    print("Fibonacci: $[F1]")
+    print("Fibonacci: $[F1]\n")
 } -> INC_TEMP]
 
 [INC_TEMP {
@@ -39,5 +43,5 @@
 } -> CHECK]
 
 [END {
-    print("Program complete")
+    print("\nProgram complete\n")
 } -> NONE]

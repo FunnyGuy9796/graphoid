@@ -7,6 +7,7 @@
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
+#include <random>
 #include "exprtk.hpp"
 
 using namespace std;
@@ -48,6 +49,7 @@ class Interpreter {
         bool isExpression(const string& operation);
         double calcExpression(const string& body);
         string convertAnswer(double answer);
+        string getRandom(string min, string max);
 
         void execNode(Node node);
     
