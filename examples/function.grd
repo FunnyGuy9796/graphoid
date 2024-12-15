@@ -7,7 +7,7 @@
 } -> OTHER]
 
 [FUNCTION {
-    print("This is the function node\n")
+    print("This is the function entry node\n")
 } -> STEP2]
 
 [STEP2 {

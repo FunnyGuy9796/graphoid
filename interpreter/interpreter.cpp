@@ -103,7 +103,10 @@ void Interpreter::setNext(int result) {
             if (nextNode.edges[result] != "NONE")
                 nextNode = getNode(nextNode.edges[result]);
             else if (callNode.name != "NONE" && inFunction) {
-                nextNode = getNode(callNode.edges[0]);
+                if (!callNode.edges.empty())
+                    nextNode = getNode(callNode.edges[0]);
+                else
+                    nextNode = getNode("END");
                 
                 inFunction = false;
                 callNode.name = "NONE";
@@ -112,14 +115,14 @@ void Interpreter::setNext(int result) {
             }
         } else if (nextNode.name != "END")
             throw runtime_error("Runtime Error: Missing next node for execution");
-    } else {
+    } else if (result == 2) {
         inFunction = true;
         callNode = nextNode;
         nextNode = funcNode;
     }
     
     if (debug)
-        cout << "nextNode: " << nextNode.name << " callNode: " << callNode.name << endl;
+        cout << "nextNode: " << nextNode.name << " callNode: " << callNode.name << " Result: " << result << endl;
 }
 
 string Interpreter::replaceVariables(const string& operation) {
@@ -172,7 +175,19 @@ bool Interpreter::isExpression(const string& operation) {
     return regex_match(operation, expressionRegex);
 }
 
-double Interpreter::calcExpression(const string& body) {
+double Interpreter::calcExpression(string& body) {
+    size_t pos = body.find("true");
+    while (pos != string::npos) {
+        body.replace(pos, 4, "1");
+        pos = body.find("true", pos + 1);
+    }
+
+    pos = body.find("false");
+    while (pos != string::npos) {
+        body.replace(pos, 5, "0");
+        pos = body.find("false", pos + 1);
+    }
+    
     if (isExpression(body)) {
         if (!parser.compile(body, expression))
             throw runtime_error("Runtime Error: Unable to compute expression " + body);
@@ -232,88 +247,89 @@ void Interpreter::execNode(Node currNode) {
     if (debug)
         cout << "Name: " << currNode.name << " Command: " << command << " Body: " << body << " Edge: " << currNode.edges[0] << endl;
 
-    if (!body.empty()) {
-        if (command == "print") {
-            if (body.front() == '"')
-                body.erase(0, 1);
-            if (body.back() == '"')
-                body.pop_back();
+    if (command == "print") {
+        if (body.front() == '"')
+            body.erase(0, 1);
+        if (body.back() == '"')
+            body.pop_back();
 
-            size_t pos = 0;
+        size_t pos = 0;
 
-            while((pos = body.find("\\n", pos)) != string::npos) {
-                body.replace(pos, 2, "\n");
-                pos++;
-            }
-            
-            cout << body;
-
-            setNext(0);
-        } else if (command == "set") {
-            vector<string> bodyParts = split(body, ',');
-
-            if (bodyParts.size() != 2)
-                throw runtime_error("Runtime Error: Invalid amount of values for set() operation");
-            
-            double expResult = calcExpression(bodyParts[1]);
-            string finalResult = convertAnswer(expResult);
-
-            auto destNodeItr = find_if(nodes.begin(), nodes.end(), [&](const Node& n) {
-                return n.name == bodyParts[0];
-            });
-
-            if (destNodeItr != nodes.end()) {
-                destNodeItr->operation = finalResult;
-
-                if (debug)
-                    cout << "Destination Node: " << destNodeItr->name << " New Value: " << destNodeItr->operation << endl;
-            } else
-                throw runtime_error("Runtime Error: Destination node not found for set() operation");
-            
-            setNext(0);
-        } else if (command == "if") {
-            result = calcExpression(body);
-
-            setNext(static_cast<int>(result));
-        } else if (command == "call") {
-            funcNode = getNode(body);
-
-            setNext(2);
-        } else if (command == "input") {
-            string input;
-
-            cin >> input;
-
-            if (input == "")
-                input = "0";
-            
-            auto destNodeItr = find_if(nodes.begin(), nodes.end(), [&](const Node& n) {
-                return n.name == body;
-            });
-
-            if (destNodeItr != nodes.end()) {
-                destNodeItr->operation = input;
-
-                if (debug)
-                    cout << "Destination Node: " << destNodeItr->name << " New Value: " << destNodeItr->operation << endl;
-            } else
-                throw runtime_error("Runtime Error: Destination node not found for input() operation");
-            
-            setNext(0);
-        } else if (command == "random") {
-            vector<string> bodyParts = split(body, ',');
-
-            if (bodyParts.size() != 2)
-                throw runtime_error("Runtime Error: Invalid amount of values for set() operation");
-            
-            auto destNodeItr = find_if(nodes.begin(), nodes.end(), [&](const Node& n) {
-                return n.name == currNode.name;
-            });
-
-            destNodeItr->operation = getRandom(bodyParts[0], bodyParts[1]);
-
-            setNext(0);
+        while((pos = body.find("\\n", pos)) != string::npos) {
+            body.replace(pos, 2, "\n");
+            pos++;
         }
+        
+        cout << body;
+
+        setNext(0);
+    } else if (command == "set" && !body.empty()) {
+        vector<string> bodyParts = split(body, ',');
+
+        if (bodyParts.size() != 2)
+            throw runtime_error("Runtime Error: Invalid amount of values for set() operation");
+        
+        double expResult = calcExpression(bodyParts[1]);
+        string finalResult = convertAnswer(expResult);
+
+        auto destNodeItr = find_if(nodes.begin(), nodes.end(), [&](const Node& n) {
+            return n.name == bodyParts[0];
+        });
+
+        if (destNodeItr != nodes.end()) {
+            destNodeItr->operation = finalResult;
+
+            if (debug)
+                cout << "Destination Node: " << destNodeItr->name << " New Value: " << destNodeItr->operation << endl;
+        } else
+            throw runtime_error("Runtime Error: Destination node not found for set() operation");
+        
+        setNext(0);
+    } else if (command == "if" && !body.empty()) {
+        result = calcExpression(body);
+
+        setNext(static_cast<int>(result));
+    } else if (command == "call" && !body.empty()) {
+        funcNode = getNode(body);
+
+        setNext(2);
+    } else if (command == "input" && !body.empty()) {
+        string input;
+
+        cin >> input;
+
+        if (input == "")
+            input = "0";
+        
+        auto destNodeItr = find_if(nodes.begin(), nodes.end(), [&](const Node& n) {
+            return n.name == body;
+        });
+
+        if (destNodeItr != nodes.end()) {
+            destNodeItr->operation = input;
+
+            if (debug)
+                cout << "Destination Node: " << destNodeItr->name << " New Value: " << destNodeItr->operation << endl;
+        } else
+            throw runtime_error("Runtime Error: Destination node not found for input() operation");
+        
+        setNext(0);
+    } else if (command == "random") {
+        if (body.empty())
+            body = "0, 100";
+
+        vector<string> bodyParts = split(body, ',');
+
+        if (bodyParts.size() != 2)
+            throw runtime_error("Runtime Error: Invalid amount of values for set() operation");
+        
+        auto destNodeItr = find_if(nodes.begin(), nodes.end(), [&](const Node& n) {
+            return n.name == currNode.name;
+        });
+
+        destNodeItr->operation = getRandom(bodyParts[0], bodyParts[1]);
+
+        setNext(0);
     }
 }
 

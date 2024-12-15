@@ -47,7 +47,7 @@ class Interpreter {
         void setNext(int result);
         string replaceVariables(const string& operation);
         bool isExpression(const string& operation);
-        double calcExpression(const string& body);
+        double calcExpression(string& body);
         string convertAnswer(double answer);
         string getRandom(string min, string max);
 
